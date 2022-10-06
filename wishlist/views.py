@@ -1,5 +1,5 @@
 import datetime
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.core import serializers
 from django.shortcuts import render
 from wishlist.models import BarangWishlist
+from wishlist.forms import BarangWishlistForm
 
 # Create your views here.
 
@@ -83,3 +84,23 @@ def show_XML(request):
 def show_XML_by_id(request, id):
     data = BarangWishlist.objects.filter(pk=id)
     return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
+
+@login_required(login_url='/wishlist/login/')
+def show_ajax(request):
+    return render(request, 'wishlist_ajax.html', {
+        'nama': "Alfredo Austin",
+    })
+
+@login_required(login_url='/wishlist/login/')
+def show_ajax_afterSubmit(request):
+    if request.method == "POST":
+        nama_barang = request.POST.get('nama_barang')
+        harga_barang = request.POST.get('harga_barang')
+        deskripsi = request.POST.get('deskripsi')
+        barang = BarangWishlist(nama_barang=nama_barang, harga_barang=harga_barang, deskripsi=deskripsi);
+        barang.save();
+        return JsonResponse({"data": {
+            "nama_barang": nama_barang,
+            "harga_barang": harga_barang,
+            "deskripsi": deskripsi,
+        }})

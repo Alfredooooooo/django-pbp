@@ -1,0 +1,109 @@
+{% extends 'base.html' %} 
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+
+<body>
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Alfredo Austin</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="navbar-brand" aria-current="page" href="{% url 'wishlist:show_wishlist' %}">Wishlist</a>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="navbar-brand" href="{% url 'wishlist:logout' %}">Logout</a>
+            </li>
+        </ul>
+        </div>
+
+            
+    </div>
+</nav>
+
+<h5>Nama:</h5>
+<p>{{nama}}</p>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nama Barang</th>
+            <th>Harga Barang</th>
+            <th>Deskripsi</th>
+        </tr>
+    </thead>
+    <tbody id="idTbody">
+    <!-- <tr>
+        <th>{{barang.nama_barang}}</th>
+        <th>{{barang.harga_barang}}</th>
+        <th>{{barang.deskripsi}}</th>
+    </tr> -->
+    </tbody>
+</table>
+
+<h5>Sesi terakhir login: {{ last_login }}</h5>
+
+<div class="container d-flex align-items-center justify-content-center p-4">
+    <div class="shadow p-3 mb-5 mt-4 bg-body rounded p-xl-5">
+        <div class="h1 mb-3">Create Your To Do List</div>
+        <form action="/wishlist/ajax/submit/" method="POST" class="inginSubmit">
+            {% csrf_token %}
+            
+            <input type="text" name="nama_barang" placeholder="Nama Barang" class="form-control">
+            <input type="text" name="harga_barang" placeholder="Harga Barang" class="form-control">
+            <input type="text" name="deskripsi" placeholder="Deskripsi Barang" class="form-control">
+
+            <div class="d-flex justify-content-center flex-grow-0 flex-shrink-0">
+                <input type="submit" name="submit" value="Daftar" class="btn btn-hover"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+    findData()
+})
+
+$('.inginSubmit').submit(function (e) {
+    e.preventDefault();
+    let form = $(this);
+    let urls = form.attr('action')
+    $.ajax({
+        url: urls,
+        type: 'POST',
+        data: form.serialize(),
+        success: (data) => {
+            var temp = `<tr> <th> ${data.data.nama_barang}</th><th>${data.data.harga_barang}</th><th>${data.data.deskripsi}</th> </tr>`
+            $(temp).appendTo("#idTbody")
+        }
+    })
+})
+
+
+function findData() {
+    $.get('/wishlist/json/', function(data) {
+        for(let i = 0; i < data.length; i++){
+            var temp = `<tr> <th> ${data[i].fields.nama_barang}</th><th>${data[i].fields.harga_barang}</th><th>${data[i].fields.deskripsi}</th> </tr>`
+            $(temp).appendTo("#idTbody")
+        }
+    })
+}
+// $(tbody).innerHTML += `<tr>${dt.fields.nama_barang}</tr><tr>${dt.fields.harga_barang}</tr><tr>${dt.fields.deskripsi}</tr>`
+
+</script>
+
+{% endblock content %}
+</body>
